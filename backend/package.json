@@ -1,0 +1,18 @@
+{
+  "name": "frontend-challenge",
+  "version": "1.0.0",
+  "description": "Hierarchical Digital Twin Search Challenge",
+  "main": "server.js",
+  "scripts": {
+    "seed": "node --experimental-sqlite seed.js",
+    "start": "node --experimental-sqlite server.js",
+    "tree": "node --experimental-sqlite visualize.js"
+  },
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1"
+  }
+}

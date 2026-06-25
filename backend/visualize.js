@@ -1,33 +1,57 @@
-const { DatabaseSync } = require('node:sqlite');
-const path = require('path');
+const { DatabaseSync } = require("node:sqlite");
+const path = require("path");
 
 // ─── CLI argument parsing ───────────────────────────────────────────────────
 const args = process.argv.slice(2);
-function hasFlag(name) { return args.includes(`--${name}`); }
+function hasFlag(name) {
+  return args.includes(`--${name}`);
+}
 function getFlagValue(name) {
   const idx = args.indexOf(`--${name}`);
   return idx !== -1 && idx + 1 < args.length ? args[idx + 1] : null;
 }
 
 const OPTS = {
-  statsOnly: hasFlag('stats-only'),
-  maxDepth: getFlagValue('max-depth') ? Number(getFlagValue('max-depth')) : Infinity,
-  rootId: getFlagValue('root'),
-  dupesCount: getFlagValue('dupes') ? Number(getFlagValue('dupes')) : (hasFlag('dupes') ? 20 : 0),
-  nameFilter: getFlagValue('name'),
-  noColor: hasFlag('no-color') || !process.stdout.isTTY,
-  mermaid: hasFlag('mermaid'),
-  mermaidMaxDepth: getFlagValue('mermaid-depth') ? Number(getFlagValue('mermaid-depth')) : 4,
+  statsOnly: hasFlag("stats-only"),
+  maxDepth: getFlagValue("max-depth")
+    ? Number(getFlagValue("max-depth"))
+    : Infinity,
+  rootId: getFlagValue("root"),
+  dupesCount: getFlagValue("dupes")
+    ? Number(getFlagValue("dupes"))
+    : hasFlag("dupes")
+      ? 20
+      : 0,
+  nameFilter: getFlagValue("name"),
+  noColor: hasFlag("no-color") || !process.stdout.isTTY,
+  mermaid: hasFlag("mermaid"),
+  mermaidMaxDepth: getFlagValue("mermaid-depth")
+    ? Number(getFlagValue("mermaid-depth"))
+    : 4,
 };
 
 // ─── ANSI helpers ───────────────────────────────────────────────────────────
 const c = OPTS.noColor
-  ? { reset: '', dim: '', bold: '', red: '', yellow: '', green: '', cyan: '', magenta: '' }
+  ? {
+      reset: "",
+      dim: "",
+      bold: "",
+      red: "",
+      yellow: "",
+      green: "",
+      cyan: "",
+      magenta: "",
+    }
   : {
-    reset: '\x1b[0m', dim: '\x1b[2m', bold: '\x1b[1m',
-    red: '\x1b[31m', yellow: '\x1b[33m', green: '\x1b[32m',
-    cyan: '\x1b[36m', magenta: '\x1b[35m',
-  };
+      reset: "\x1b[0m",
+      dim: "\x1b[2m",
+      bold: "\x1b[1m",
+      red: "\x1b[31m",
+      yellow: "\x1b[33m",
+      green: "\x1b[32m",
+      cyan: "\x1b[36m",
+      magenta: "\x1b[35m",
+    };
 
 const STATUS_GLYPH = {
   1: `${c.green}●${c.reset}`,
@@ -36,15 +60,15 @@ const STATUS_GLYPH = {
 };
 
 // ─── Load data ──────────────────────────────────────────────────────────────
-const dbPath = path.resolve(__dirname, 'assets.db');
+const dbPath = path.resolve(__dirname, "assets.db");
 const db = new DatabaseSync(dbPath);
 
-const allAssets = db.prepare('SELECT * FROM assets').all();
-const allClasses = db.prepare('SELECT * FROM classes').all();
+const allAssets = db.prepare("SELECT * FROM assets").all();
+const allClasses = db.prepare("SELECT * FROM classes").all();
 db.close();
 
-const classMap = new Map(allClasses.map(cls => [cls.id, cls]));
-const assetMap = new Map(allAssets.map(a => [a.id, a]));
+const classMap = new Map(allClasses.map((cls) => [cls.id, cls]));
+const assetMap = new Map(allAssets.map((a) => [a.id, a]));
 const childrenMap = new Map(); // parentId -> [asset]
 
 for (const a of allAssets) {
@@ -59,34 +83,39 @@ function findRoot() {
     // Try numeric id first, then friendlyId
     const numId = Number(OPTS.rootId);
     if (!isNaN(numId) && assetMap.has(numId)) return assetMap.get(numId);
-    const byFriendly = allAssets.find(a => a.friendlyId === OPTS.rootId);
+    const byFriendly = allAssets.find((a) => a.friendlyId === OPTS.rootId);
     if (byFriendly) return byFriendly;
     console.error(`Root not found: ${OPTS.rootId}`);
     process.exit(1);
   }
   // Default: the asset with parentId = null
-  const roots = allAssets.filter(a => a.parentId === null);
-  if (roots.length === 0) { console.error('No root asset found.'); process.exit(1); }
+  const roots = allAssets.filter((a) => a.parentId === null);
+  if (roots.length === 0) {
+    console.error("No root asset found.");
+    process.exit(1);
+  }
   return roots[0];
 }
 
 // ─── ASCII tree renderer ────────────────────────────────────────────────────
 function renderNode(asset) {
-  const status = STATUS_GLYPH[asset.statusId] || '?';
+  const status = STATUS_GLYPH[asset.statusId] || "?";
   const id = `${c.dim}#${asset.id}${c.reset}`;
   const friendly = `${c.dim}[${asset.friendlyId}]${c.reset}`;
-  const cls = asset.classId ? `${c.magenta}«${classMap.get(asset.classId)?.name || '?'}»${c.reset}` : '';
-  return `${status} ${id} ${c.bold}${asset.name}${c.reset} ${friendly}${cls ? ' ' + cls : ''}`;
+  const cls = asset.classId
+    ? `${c.magenta}«${classMap.get(asset.classId)?.name || "?"}»${c.reset}`
+    : "";
+  return `${status} ${id} ${c.bold}${asset.name}${c.reset} ${friendly}${cls ? " " + cls : ""}`;
 }
 
 function printTree(asset, prefix, isLast, depth) {
   if (depth > OPTS.maxDepth) return;
-  const connector = depth === 0 ? '' : (isLast ? '└── ' : '├── ');
+  const connector = depth === 0 ? "" : isLast ? "└── " : "├── ";
   const line = `${prefix}${connector}${renderNode(asset)}`;
   console.log(line);
 
   const children = childrenMap.get(asset.id) || [];
-  const newPrefix = depth === 0 ? '' : prefix + (isLast ? '    ' : '│   ');
+  const newPrefix = depth === 0 ? "" : prefix + (isLast ? "    " : "│   ");
   for (let i = 0; i < children.length; i++) {
     printTree(children[i], newPrefix, i === children.length - 1, depth + 1);
   }
@@ -115,16 +144,18 @@ function computeStats() {
   }
 
   const maxDepth = Math.max(...depthHistogram.keys());
-  const leaves = childCounts.filter(c => c === 0).length;
-  const nonLeafCounts = childCounts.filter(c => c > 0);
+  const leaves = childCounts.filter((c) => c === 0).length;
+  const nonLeafCounts = childCounts.filter((c) => c > 0);
   const avgChildren = nonLeafCounts.length
-    ? (nonLeafCounts.reduce((s, v) => s + v, 0) / nonLeafCounts.length).toFixed(1)
+    ? (nonLeafCounts.reduce((s, v) => s + v, 0) / nonLeafCounts.length).toFixed(
+        1,
+      )
     : 0;
   const maxChildren = Math.max(...childCounts);
   const minChildren = Math.min(...nonLeafCounts);
 
-  const distinctNames = new Set(allAssets.map(a => a.name)).size;
-  const instances = allAssets.filter(a => a.classId !== null).length;
+  const distinctNames = new Set(allAssets.map((a) => a.name)).size;
+  const instances = allAssets.filter((a) => a.classId !== null).length;
 
   return {
     total: allAssets.length,
@@ -145,21 +176,27 @@ function printStats() {
   console.log(`\n${c.bold}═══ Asset Hierarchy Statistics ═══${c.reset}\n`);
   console.log(`  Total assets:       ${s.total}`);
   console.log(`  Class definitions:  ${s.classes}`);
-  console.log(`  Class instances:    ${s.instances} (${((s.instances / s.total) * 100).toFixed(1)}%)`);
+  console.log(
+    `  Class instances:    ${s.instances} (${((s.instances / s.total) * 100).toFixed(1)}%)`,
+  );
   console.log(`  Regular assets:     ${s.total - s.instances}`);
   console.log(`  Distinct names:     ${s.distinctNames}`);
-  console.log(`  Duplicate factor:   ${(s.total / s.distinctNames).toFixed(1)}x`);
+  console.log(
+    `  Duplicate factor:   ${(s.total / s.distinctNames).toFixed(1)}x`,
+  );
   console.log(`  Leaf nodes:         ${s.leaves}`);
   console.log(`  Max depth:          ${s.maxDepth}`);
-  console.log(`  Children (non-leaf): min=${s.minChildren} avg=${s.avgChildren} max=${s.maxChildren}`);
+  console.log(
+    `  Children (non-leaf): min=${s.minChildren} avg=${s.avgChildren} max=${s.maxChildren}`,
+  );
   console.log(`\n  ${c.bold}Depth histogram:${c.reset}`);
   const sorted = [...s.depthHistogram.entries()].sort((a, b) => a[0] - b[0]);
   const maxCount = Math.max(...sorted.map(([, v]) => v));
   for (const [depth, count] of sorted) {
-    const bar = '█'.repeat(Math.ceil((count / maxCount) * 40));
+    const bar = "█".repeat(Math.ceil((count / maxCount) * 40));
     console.log(`    L${depth}: ${c.cyan}${bar}${c.reset} ${count}`);
   }
-  console.log('');
+  console.log("");
 }
 
 // ─── Duplicates report ──────────────────────────────────────────────────────
@@ -170,7 +207,7 @@ function getPath(asset) {
     parts.unshift(current.name);
     current = current.parentId ? assetMap.get(current.parentId) : null;
   }
-  return parts.join(' → ');
+  return parts.join(" → ");
 }
 
 function printDupes(limit) {
@@ -187,59 +224,74 @@ function printDupes(limit) {
     .sort((a, b) => b[1].length - a[1].length)
     .slice(0, limit);
 
-  console.log(`\n${c.bold}═══ Duplicate Names Report (top ${limit}) ═══${c.reset}\n`);
+  console.log(
+    `\n${c.bold}═══ Duplicate Names Report (top ${limit}) ═══${c.reset}\n`,
+  );
   console.log(`  ${dupes.length} names shown, each appearing 2+ times.\n`);
 
   for (const [name, assets] of dupes) {
-    console.log(`  ${c.bold}${c.yellow}"${name}"${c.reset} — ${assets.length} occurrences:`);
-    for (const a of assets.slice(0, 8)) { // Cap at 8 examples per name
-      const status = STATUS_GLYPH[a.statusId] || '?';
-      const cls = a.classId ? ` ${c.magenta}«${classMap.get(a.classId)?.name}»${c.reset}` : '';
+    console.log(
+      `  ${c.bold}${c.yellow}"${name}"${c.reset} — ${assets.length} occurrences:`,
+    );
+    for (const a of assets.slice(0, 8)) {
+      // Cap at 8 examples per name
+      const status = STATUS_GLYPH[a.statusId] || "?";
+      const cls = a.classId
+        ? ` ${c.magenta}«${classMap.get(a.classId)?.name}»${c.reset}`
+        : "";
       console.log(`    ${status} ${c.dim}${getPath(a)}${c.reset}${cls}`);
       console.log(`      ${c.dim}friendlyId: ${a.friendlyId}${c.reset}`);
     }
     if (assets.length > 8) {
       console.log(`    ${c.dim}... and ${assets.length - 8} more${c.reset}`);
     }
-    console.log('');
+    console.log("");
   }
 }
 
 // ─── Name search ────────────────────────────────────────────────────────────
 function printNameSearch(query) {
   const lower = query.toLowerCase();
-  const matches = allAssets.filter(a => a.name.toLowerCase().includes(lower));
-  console.log(`\n${c.bold}═══ Search: "${query}" — ${matches.length} results ═══${c.reset}\n`);
+  const matches = allAssets.filter((a) => a.name.toLowerCase().includes(lower));
+  console.log(
+    `\n${c.bold}═══ Search: "${query}" — ${matches.length} results ═══${c.reset}\n`,
+  );
   for (const a of matches.slice(0, 30)) {
-    const status = STATUS_GLYPH[a.statusId] || '?';
-    const cls = a.classId ? ` ${c.magenta}«${classMap.get(a.classId)?.name}»${c.reset}` : '';
+    const status = STATUS_GLYPH[a.statusId] || "?";
+    const cls = a.classId
+      ? ` ${c.magenta}«${classMap.get(a.classId)?.name}»${c.reset}`
+      : "";
     console.log(`  ${status} ${c.bold}${a.name}${c.reset}${cls}`);
     console.log(`    ${c.dim}${getPath(a)}${c.reset}`);
     console.log(`    ${c.dim}friendlyId: ${a.friendlyId}${c.reset}`);
   }
   if (matches.length > 30) {
-    console.log(`\n  ${c.dim}... and ${matches.length - 30} more results${c.reset}`);
+    console.log(
+      `\n  ${c.dim}... and ${matches.length - 30} more results${c.reset}`,
+    );
   }
-  console.log('');
+  console.log("");
 }
 
 // ─── Mermaid diagram ────────────────────────────────────────────────────────
 function mermaidEscape(str) {
-  return str.replace(/["]/g, "'").replace(/[\[\](){}]/g, ' ');
+  return str.replace(/["]/g, "'").replace(/[\[\](){}]/g, " ");
 }
 
 function printMermaid() {
   const root = findRoot();
   const maxD = OPTS.mermaidMaxDepth;
-  const lines = ['graph TD'];
+  const lines = ["graph TD"];
   const visited = new Set();
 
-  function nodeId(asset) { return `N${asset.id}`; }
+  function nodeId(asset) {
+    return `N${asset.id}`;
+  }
 
   function statusStyle(asset) {
-    if (asset.statusId === 3) return ':::critical';
-    if (asset.statusId === 2) return ':::warning';
-    return '';
+    if (asset.statusId === 3) return ":::critical";
+    if (asset.statusId === 2) return ":::warning";
+    return "";
   }
 
   function walk(asset, depth) {
@@ -247,7 +299,9 @@ function printMermaid() {
     visited.add(asset.id);
 
     const label = mermaidEscape(asset.name);
-    const cls = asset.classId ? ` - ${mermaidEscape(classMap.get(asset.classId)?.name || '')}` : '';
+    const cls = asset.classId
+      ? ` - ${mermaidEscape(classMap.get(asset.classId)?.name || "")}`
+      : "";
     lines.push(`  ${nodeId(asset)}["${label}${cls}"]${statusStyle(asset)}`);
 
     const children = childrenMap.get(asset.id) || [];
@@ -260,13 +314,17 @@ function printMermaid() {
   walk(root, 0);
 
   // Add class definitions for styling
-  lines.push('');
-  lines.push('  classDef critical fill:#fee2e2,stroke:#dc2626,color:#991b1b');
-  lines.push('  classDef warning fill:#fef9c3,stroke:#ca8a04,color:#854d0e');
+  lines.push("");
+  lines.push("  classDef critical fill:#fee2e2,stroke:#dc2626,color:#991b1b");
+  lines.push("  classDef warning fill:#fef9c3,stroke:#ca8a04,color:#854d0e");
 
-  console.log(lines.join('\n'));
-  console.error(`\nMermaid diagram generated (${visited.size} nodes, max-depth ${maxD}).`);
-  console.error(`Tip: Adjust depth with --mermaid-depth N. Pipe to a .mmd file: npm run tree -- --mermaid > tree.mmd`);
+  console.log(lines.join("\n"));
+  console.error(
+    `\nMermaid diagram generated (${visited.size} nodes, max-depth ${maxD}).`,
+  );
+  console.error(
+    `Tip: Adjust depth with --mermaid-depth N. Pipe to a .mmd file: npm run tree -- --mermaid > tree.mmd`,
+  );
 }
 
 // ─── Main ───────────────────────────────────────────────────────────────────
@@ -284,7 +342,7 @@ function main() {
   if (!OPTS.statsOnly) {
     const root = findRoot();
     console.log(`\n${c.bold}═══ Asset Hierarchy Tree ═══${c.reset}\n`);
-    printTree(root, '', true, 0);
+    printTree(root, "", true, 0);
   }
 
   printStats();
@@ -298,8 +356,12 @@ function main() {
       if (!nameGroups.has(a.name)) nameGroups.set(a.name, []);
       nameGroups.get(a.name).push(a);
     }
-    const dupCount = [...nameGroups.values()].filter(arr => arr.length > 1).length;
-    console.log(`  ${c.dim}Tip: ${dupCount} names are duplicated. Run with --dupes 20 for the full report.${c.reset}\n`);
+    const dupCount = [...nameGroups.values()].filter(
+      (arr) => arr.length > 1,
+    ).length;
+    console.log(
+      `  ${c.dim}Tip: ${dupCount} names are duplicated. Run with --dupes 20 for the full report.${c.reset}\n`,
+    );
   }
 }
 

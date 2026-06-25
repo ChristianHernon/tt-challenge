@@ -80,7 +80,10 @@ app.get("/api/assets", async (req, res) => {
     JOIN asset_statuses b ON a.statusId = b.id
     LEFT JOIN classes c ON a.classId = c.id
   `);
-  const result = assets.map((a) => ({ ...a, ancestors: ancestorMap.get(a.id) ?? [] }));
+  const result = assets.map((a) => ({
+    ...a,
+    ancestors: ancestorMap.get(a.id) ?? [],
+  }));
   res.json(result);
 });
 
@@ -140,7 +143,9 @@ app.post("/api/assets/search", async (req, res) => {
 
   if (req.body.ancestorId) {
     const ancestorId = parseInt(req.body.ancestorId, 10);
-    const descendants = !isNaN(ancestorId) ? descendantMap.get(ancestorId) : undefined;
+    const descendants = !isNaN(ancestorId)
+      ? descendantMap.get(ancestorId)
+      : undefined;
     if (descendants?.size) {
       where.push(`AND a.id IN (${[...descendants].join(",")})`);
     } else {
@@ -160,7 +165,10 @@ app.post("/api/assets/search", async (req, res) => {
   `,
     params,
   );
-  const result = assets.map((a) => ({ ...a, ancestors: ancestorMap.get(a.id) ?? [] }));
+  const result = assets.map((a) => ({
+    ...a,
+    ancestors: ancestorMap.get(a.id) ?? [],
+  }));
   res.status(200).json({ count: result.length, assets: result });
 });
 

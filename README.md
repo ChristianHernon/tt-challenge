@@ -1,7 +1,8 @@
 # Frontend Engineering Challenge
 
 ## Scenario
-In industrial IoT, digital twins represent complex hierarchies of physical hardware components (e.g., Factories → Production Lines → Heavy Machinery → Sub-components). 
+
+In industrial IoT, digital twins represent complex hierarchies of physical hardware components (e.g., Factories → Production Lines → Heavy Machinery → Sub-components).
 
 Because equipment lines are standardized, multiple distinct entities often share identical names across different zones (e.g., multiple production lines can contain an identical nested sub-component named `"Pump"` or `"Vibration Sensor"`). For operators on the plant floor, simple text search returns hundreds of duplicate names, creating massive confusion and errors.
 
@@ -10,6 +11,7 @@ Your goal is to build an elegant **Asset Search Component** in React that solves
 ---
 
 ## Architecture Overview
+
 The repository is split into two directories:
 
 ```
@@ -31,9 +33,10 @@ The repository is split into two directories:
 
 Build a React UI that allows users to search and confidently identify assets within a deeply nested equipment hierarchy.
 
-The core challenge is **disambiguation**: assets frequently share identical names across different zones, so a result like `"Pump"` is meaningless without context. Your UI should make it immediately clear *where* in the hierarchy each result lives — an operator should never have to guess which `"Pump"` they're looking at.
+The core challenge is **disambiguation**: assets frequently share identical names across different zones, so a result like `"Pump"` is meaningless without context. Your UI should make it immediately clear _where_ in the hierarchy each result lives — an operator should never have to guess which `"Pump"` they're looking at.
 
 Search should support flexible matching:
+
 - **Partial / substring / wildcard**: `"Motor"` finds all assets containing "Motor"; `"Motor*"` finds assets starting with "Motor"; `"*Motor"` finds assets ending with "Motor".
 - **Exclusion**: Allow users to exclude terms from results (e.g., find "Pump" but not "Backup Pump").
 

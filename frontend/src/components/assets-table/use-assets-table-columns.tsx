@@ -2,6 +2,7 @@ import { Stack } from "@mui/material";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import type { AssetsItem } from "../../api/types";
+import { AncestorBreadcrumbCell } from "./ancestor-breadcrumb-cell";
 import { IconCell, isIconKey } from "./icon-cell";
 import { StatusCell, isStatus } from "./status-cell";
 
@@ -31,6 +32,16 @@ export const useAssetsTableColumns = () => {
         },
       },
       {
+        field: "ancestors",
+        headerName: "Location",
+        flex: 2,
+        sortable: false,
+        filterable: false,
+        renderCell: ({ row }) => (
+          <AncestorBreadcrumbCell ancestors={row.ancestors} />
+        ),
+      },
+      {
         field: "description",
         headerName: "Description",
         flex: 1,
@@ -46,16 +57,13 @@ export const useAssetsTableColumns = () => {
         },
       },
       {
-        field: "parentId",
-        headerName: "Parent",
-        type: "number",
-      },
-      {
         field: "className",
         headerName: "Class",
-        flex: 1,
+        width: 200,
         renderCell: ({ row }) => (
-          <span title={row.classDescription}>{row.className}</span>
+          <span title={row.classDescription ?? "N/A"}>
+            {row.className ?? "-"}
+          </span>
         ),
       },
     ],

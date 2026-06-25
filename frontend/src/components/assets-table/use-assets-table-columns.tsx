@@ -18,6 +18,7 @@ export const useAssetsTableColumns = () => {
         field: "name",
         headerName: "Name",
         flex: 1,
+        maxWidth: 200,
         renderCell: ({ row }) => {
           const { icon, name } = row;
 

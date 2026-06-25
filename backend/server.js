@@ -26,10 +26,7 @@ app.post("/api/assets/search", async (req, res) => {
   }
 
   const params = [];
-  let query = "SELECT * FROM assets";
-  // query += " JOIN asset_statuses ON assets.statusId = asset_statuses.id";
-  // query += " JOIN classes ON assets.classId = classes.id";
-  query += " WHERE 1=1";
+  let query = "SELECT * FROM assets WHERE 1=1";
 
   if (req.body.name) {
     query += " AND name LIKE ?";
@@ -57,7 +54,7 @@ app.post("/api/assets/search", async (req, res) => {
   }
 
   const assets = await dbAll(query, params);
-  res.status(200).json(assets);
+  res.status(200).json({ count: assets.length, assets });
 });
 
 app.listen(PORT, () => {

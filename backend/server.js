@@ -9,13 +9,30 @@ app.use(cors());
 app.use(express.json());
 
 app.get("/api/assets", async (req, res) => {
-  const assets = await dbAll("SELECT * FROM assets");
+  const assets = await dbAll(`
+    SELECT a.id, a.name, a.description, a.friendlyId, a.parentId,
+           b.name as status, a.icon, a.classId,
+           c.name as className, c.description as classDescription
+    FROM assets a
+    JOIN asset_statuses b ON a.statusId = b.id
+    LEFT JOIN classes c ON a.classId = c.id
+  `);
   res.json(assets);
 });
 
 app.get("/api/assets/icons", async (req, res) => {
   const icons = await dbAll("SELECT DISTINCT icon FROM assets");
-  res.json(icons);
+  const iconEnum = icons.reduce((acc, { icon }) => {
+    acc[icon] = icon;
+    return acc;
+  }, {});
+
+  res.json(iconEnum);
+});
+
+app.get("/api/classes", async (req, res) => {
+  const assetClasses = await dbAll("SELECT * FROM classes");
+  res.json({ count: assetClasses.length, classes: assetClasses });
 });
 
 app.post("/api/assets/search", async (req, res) => {
@@ -26,34 +43,42 @@ app.post("/api/assets/search", async (req, res) => {
   }
 
   const params = [];
-  let query = "SELECT * FROM assets WHERE 1=1";
+  const where = ["WHERE 1=1"];
 
   if (req.body.name) {
-    query += " AND name LIKE ?";
+    where.push("AND a.name LIKE ?");
 
     if (req.body.name.startsWith("*")) {
-      params.push(req.body.name.replace(/^\*/, '%'));
+      params.push(req.body.name.replace(/^\*/, "%"));
     } else if (req.body.name.endsWith("*")) {
-      params.push(req.body.name.replace(/\*$/, '%'));
+      params.push(req.body.name.replace(/\*$/, "%"));
     } else params.push(`%${req.body.name}%`);
   }
 
   if (req.body.parentId) {
-    query += " AND parentId = ?";
+    where.push("AND a.parentId = ?");
     params.push(req.body.parentId);
   }
 
   if (req.body.statusId) {
-    query += " AND statusId = ?";
+    where.push("AND a.statusId = ?");
     params.push(req.body.statusId);
   }
 
   if (req.body.classId) {
-    query += " AND classId = ?";
+    where.push("AND a.classId = ?");
     params.push(req.body.classId);
   }
 
-  const assets = await dbAll(query, params);
+  const assets = await dbAll(`
+    SELECT a.id, a.name, a.description, a.friendlyId, a.parentId,
+           b.name as status, a.icon, a.classId,
+           c.name as className, c.description as classDescription
+    FROM assets a
+    JOIN asset_statuses b ON a.statusId = b.id
+    LEFT JOIN classes c ON a.classId = c.id
+    ${where.join(" ")}
+  `, params);
   res.status(200).json({ count: assets.length, assets });
 });
 

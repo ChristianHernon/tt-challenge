@@ -23,7 +23,10 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <main style={{ padding: "2rem" }}>
-        <Stack direction="row" sx={{ justifyContent: "space-between", mb: 2 }}>
+        <Stack
+          direction="row"
+          sx={{ justifyContent: "space-between", alignItems: "center", mb: 2 }}
+        >
           <Typography
             variant="h2"
             gutterBottom

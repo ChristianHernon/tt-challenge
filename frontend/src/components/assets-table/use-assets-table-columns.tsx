@@ -1,4 +1,4 @@
-import { Stack } from "@mui/material";
+import Stack from "@mui/material/Stack";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import type { AssetsItem } from "../../api/types";

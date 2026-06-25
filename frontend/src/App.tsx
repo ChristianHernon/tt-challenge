@@ -1,11 +1,11 @@
-import { Stack, Typography } from "@mui/material";
 import CssBaseline from "@mui/material/CssBaseline";
 import IconButton from "@mui/material/IconButton";
+import Stack from "@mui/material/Stack";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import Tooltip from "@mui/material/Tooltip";
-import { Moon, Sun } from "lucide-react";
+import Typography from "@mui/material/Typography";
+import { Moon, PawPrint, Sun } from "lucide-react";
 import { useMemo, useState } from "react";
-import "./App.css";
 import { AssetsTable } from "./components/assets-table/assets-table";
 
 function App() {
@@ -25,15 +25,17 @@ function App() {
       <main style={{ padding: "2rem" }}>
         <Stack
           direction="row"
-          sx={{ justifyContent: "space-between", alignItems: "center", mb: 2 }}
+          sx={{ justifyContent: "space-between", alignItems: "center", mb: 4 }}
         >
-          <Typography
-            variant="h2"
-            gutterBottom
-            sx={{ color: mode === "dark" ? "#eee" : "#333" }}
-          >
-            Acme Pet Nutrition
-          </Typography>
+          <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
+            <PawPrint size={48} />
+            <Typography
+              variant="h2"
+              sx={{ color: mode === "dark" ? "#eee" : "#333" }}
+            >
+              Acme Pet Nutrition
+            </Typography>
+          </Stack>
           <Tooltip
             title={
               mode === "dark" ? "Switch to light mode" : "Switch to dark mode"

@@ -33,7 +33,12 @@ app.post("/api/assets/search", async (req, res) => {
 
   if (req.body.name) {
     query += " AND name LIKE ?";
-    params.push(req.body.name);
+
+    if (req.body.name.startsWith("*")) {
+      params.push(req.body.name.replace(/^\*/, '%'));
+    } else if (req.body.name.endsWith("*")) {
+      params.push(req.body.name.replace(/\*$/, '%'));
+    } else params.push(`%${req.body.name}%`);
   }
 
   if (req.body.parentId) {
@@ -50,8 +55,6 @@ app.post("/api/assets/search", async (req, res) => {
     query += " AND classId = ?";
     params.push(req.body.classId);
   }
-
-  // console.log(query, params);
 
   const assets = await dbAll(query, params);
   res.status(200).json(assets);

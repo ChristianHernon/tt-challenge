@@ -11,40 +11,40 @@ import {
 import { ICONS } from "../../api/use-icons";
 
 type IconKey = keyof typeof ICONS;
-type Props = { icon: IconKey };
+type Props = { icon: IconKey; size?: number };
 
 export const isIconKey = (value: string): value is IconKey =>
   Object.values(ICONS).includes(value as IconKey);
 
-const ICON_SIZE = 20;
+const DEFAULT_SIZE = 20;
 
-export const IconCell = ({ icon }: Props) => {
+export const IconCell = ({ icon, size = DEFAULT_SIZE }: Props) => {
   let iconElement: React.ReactNode;
 
   switch (icon) {
     case ICONS.sensor:
-      iconElement = <ChartLine size={ICON_SIZE} />;
+      iconElement = <ChartLine size={size} />;
       break;
     case ICONS.site:
-      iconElement = <LandPlot size={ICON_SIZE} />;
+      iconElement = <LandPlot size={size} />;
       break;
     case ICONS.line:
-      iconElement = <LineDotRightHorizontal size={ICON_SIZE} />;
+      iconElement = <LineDotRightHorizontal size={size} />;
       break;
     case ICONS.enterprise:
-      iconElement = <Building2 size={ICON_SIZE} />;
+      iconElement = <Building2 size={size} />;
       break;
     case ICONS.area:
-      iconElement = <Map size={ICON_SIZE} />;
+      iconElement = <Map size={size} />;
       break;
     case ICONS.equipment:
-      iconElement = <Wrench size={ICON_SIZE} />;
+      iconElement = <Wrench size={size} />;
       break;
     case ICONS.subassembly:
-      iconElement = <Layers size={ICON_SIZE} />;
+      iconElement = <Layers size={size} />;
       break;
     case ICONS.component:
-      iconElement = <Box size={ICON_SIZE} />;
+      iconElement = <Box size={size} />;
       break;
     default: {
       const _exhaustive: never = icon;

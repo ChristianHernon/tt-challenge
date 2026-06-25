@@ -6,6 +6,7 @@ export interface SearchAssetsParams {
   parentId?: number;
   statusId?: number;
   classId?: number;
+  ancestorId?: number;
 }
 
 export interface SearchAssetsItem extends Omit<AssetsItem, "statusId"> {

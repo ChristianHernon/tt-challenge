@@ -1,4 +1,4 @@
-import { Typography } from "@mui/material";
+import { Stack, Typography } from "@mui/material";
 import CssBaseline from "@mui/material/CssBaseline";
 import IconButton from "@mui/material/IconButton";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
@@ -23,13 +23,14 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <main style={{ padding: "2rem" }}>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "flex-end",
-            marginBottom: "1rem",
-          }}
-        >
+        <Stack direction="row" sx={{ justifyContent: "space-between", mb: 2 }}>
+          <Typography
+            variant="h2"
+            gutterBottom
+            sx={{ color: mode === "dark" ? "#eee" : "#333" }}
+          >
+            Acme Pet Nutrition
+          </Typography>
           <Tooltip
             title={
               mode === "dark" ? "Switch to light mode" : "Switch to dark mode"
@@ -42,14 +43,7 @@ function App() {
               {mode === "dark" ? <Sun size={20} /> : <Moon size={20} />}
             </IconButton>
           </Tooltip>
-        </div>
-        <Typography
-          variant="h2"
-          gutterBottom
-          sx={{ color: mode === "dark" ? "#eee" : "#333" }}
-        >
-          Acme Pet Nutrition
-        </Typography>
+        </Stack>
         <AssetsTable />
       </main>
     </ThemeProvider>

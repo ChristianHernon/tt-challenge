@@ -1,4 +1,5 @@
-import { Box, Stack } from "@mui/material";
+import Box from "@mui/material/Box";
+import Stack from "@mui/material/Stack";
 import type { AncestorItem } from "../../api/types";
 import { ICONS } from "../../api/use-icons";
 

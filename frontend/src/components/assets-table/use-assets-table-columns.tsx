@@ -1,4 +1,4 @@
-import { Stack } from "@mui/material";
+import Stack from "@mui/material/Stack";
 import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import type { AssetsItem } from "../../api/types";
@@ -18,6 +18,7 @@ export const useAssetsTableColumns = () => {
         field: "name",
         headerName: "Name",
         flex: 1,
+        maxWidth: 200,
         renderCell: ({ row }) => {
           const { icon, name } = row;
 

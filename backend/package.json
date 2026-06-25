@@ -6,7 +6,8 @@
   "scripts": {
     "seed": "node --experimental-sqlite seed.js",
     "start": "node --experimental-sqlite server.js",
-    "tree": "node --experimental-sqlite visualize.js"
+    "tree": "node --experimental-sqlite visualize.js",
+    "dev": "nodemon server.js"
   },
   "engines": {
     "node": ">=22.5.0"
@@ -14,5 +15,8 @@
   "dependencies": {
     "cors": "^2.8.6",
     "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
   }
 }

@@ -11,9 +11,9 @@ import { useAssetsTableColumns } from "./use-assets-table-columns";
 
 export const AssetsTable = () => {
   const columns = useAssetsTableColumns();
-  const { debouncedParams, hasFilters, setDebouncedParams } = useAssetFilters();
+  const { debouncedParams, hasFilters, setParams } = useAssetFilters();
   const { data: assetsData } = useQuery(useAssetsQueryOptions());
-  const { data: searchData } = useQuery(
+  const { data: searchData, isFetching } = useQuery(
     useSearchAssetsQueryOptions(debouncedParams),
   );
   const { data: hierarchyData } = useQuery(useHierarchyQueryOptions());
@@ -26,7 +26,7 @@ export const AssetsTable = () => {
   return (
     <Stack spacing={4}>
       <AssetsTableFilters
-        onParamsChange={setDebouncedParams}
+        onParamsChange={setParams}
         hierarchyPaths={hierarchyData?.paths ?? []}
       />
       <DataGrid
@@ -35,6 +35,7 @@ export const AssetsTable = () => {
         getDetailPanelContent={(params) => (
           <span>{params.row.description}</span>
         )}
+        loading={isFetching}
         initialState={{
           columns: {
             columnVisibilityModel: {

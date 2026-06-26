@@ -3,6 +3,7 @@ import type { AssetsItem } from "./types";
 
 export interface SearchAssetsParams {
   name?: string;
+  excludeNames?: string[];
   parentId?: number;
   statusId?: number;
   classId?: number;

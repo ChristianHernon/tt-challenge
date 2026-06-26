@@ -10,13 +10,9 @@ export interface SearchAssetsParams {
   ancestorId?: number;
 }
 
-export interface SearchAssetsItem extends Omit<AssetsItem, "statusId"> {
-  status: string;
-}
-
 export interface SearchAssetsResponse {
   count: number;
-  assets: SearchAssetsItem[];
+  assets: AssetsItem[];
 }
 
 export const getSearchAssetsQueryKey = (params: SearchAssetsParams) => [
@@ -26,8 +22,6 @@ export const getSearchAssetsQueryKey = (params: SearchAssetsParams) => [
 ];
 
 export const useSearchAssetsQueryOptions = (params: SearchAssetsParams) => {
-  const hasParams = Object.values(params).some((v) => v !== undefined);
-
   return queryOptions({
     queryKey: getSearchAssetsQueryKey(params),
     queryFn: async (): Promise<SearchAssetsResponse> => {
@@ -38,6 +32,5 @@ export const useSearchAssetsQueryOptions = (params: SearchAssetsParams) => {
       });
       return res.json();
     },
-    enabled: hasParams,
   });
 };

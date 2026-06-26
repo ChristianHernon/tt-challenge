@@ -23,31 +23,50 @@ export const AssetsTableFilters = ({
   const [status, setStatus] = useState<number | "">("");
   const [ancestor, setAncestor] = useState<HierarchyPath | null>(null);
 
+  const parseNameQuery = (
+    value: string,
+  ): { name?: string; excludeNames?: string[] } => {
+    const tokens = value.trim().split(/\s+/).filter(Boolean);
+    const excludeNames: string[] = [];
+    const includeTokens: string[] = [];
+
+    for (const token of tokens) {
+      if (token.startsWith("-") && token.length > 1) {
+        excludeNames.push(token.slice(1));
+      } else {
+        includeTokens.push(token);
+      }
+    }
+
+    return {
+      name: includeTokens.length > 0 ? includeTokens.join(" ") : undefined,
+      excludeNames: excludeNames.length > 0 ? excludeNames : undefined,
+    };
+  };
+
+  const buildParams = (
+    nameValue: string,
+    statusValue: number | "",
+    ancestorValue: HierarchyPath | null,
+  ): SearchAssetsParams => ({
+    ...parseNameQuery(nameValue),
+    statusId: statusValue || undefined,
+    ancestorId: ancestorValue?.id,
+  });
+
   const handleNameChange = (value: string) => {
     setName(value);
-    onParamsChange({
-      name: value || undefined,
-      statusId: status || undefined,
-      ancestorId: ancestor?.id,
-    });
+    onParamsChange(buildParams(value, status, ancestor));
   };
 
   const handleStatusChange = (value: number | "") => {
     setStatus(value);
-    onParamsChange({
-      name: name || undefined,
-      statusId: value || undefined,
-      ancestorId: ancestor?.id,
-    });
+    onParamsChange(buildParams(name, value, ancestor));
   };
 
   const handleAncestorChange = (value: HierarchyPath | null) => {
     setAncestor(value);
-    onParamsChange({
-      name: name || undefined,
-      statusId: status || undefined,
-      ancestorId: value?.id,
-    });
+    onParamsChange(buildParams(name, status, value));
   };
 
   return (

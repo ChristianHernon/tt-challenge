@@ -107,7 +107,15 @@ app.get("/api/classes", async (req, res) => {
 });
 
 app.post("/api/assets/search", async (req, res) => {
-  if (Object.keys(req.body ?? {}).length === 0) {
+  const hasFilter =
+    req.body.name ||
+    (Array.isArray(req.body.excludeNames) && req.body.excludeNames.length) ||
+    req.body.parentId ||
+    req.body.statusId ||
+    req.body.classId ||
+    req.body.ancestorId;
+
+  if (!hasFilter) {
     return res
       .status(400)
       .json({ error: "Please provide at least one filter" });
@@ -123,7 +131,22 @@ app.post("/api/assets/search", async (req, res) => {
       params.push(req.body.name.replace(/^\*/, "%"));
     } else if (req.body.name.endsWith("*")) {
       params.push(req.body.name.replace(/\*$/, "%"));
-    } else params.push(`%${req.body.name}%`);
+    } else {
+      params.push(`%${req.body.name}%`);
+    }
+  }
+
+  if (Array.isArray(req.body.excludeNames) && req.body.excludeNames.length) {
+    for (const term of req.body.excludeNames) {
+      where.push("AND a.name NOT LIKE ?");
+      if (term.startsWith("*")) {
+        params.push(term.replace(/^\*/, "%"));
+      } else if (term.endsWith("*")) {
+        params.push(term.replace(/\*$/, "%"));
+      } else {
+        params.push(`%${term}%`);
+      }
+    }
   }
 
   if (req.body.parentId) {

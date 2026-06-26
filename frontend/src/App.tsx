@@ -6,7 +6,7 @@ import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import { Moon, PawPrint, Sun } from "lucide-react";
 import { useMemo, useState } from "react";
-import { AssetsTable } from "./components/assets-table/assets-table";
+import { AssetsTreemap } from "./components/assets-treemap/assets-treemap";
 
 function App() {
   const [mode, setMode] = useState<"light" | "dark">("dark");
@@ -49,7 +49,7 @@ function App() {
             </IconButton>
           </Tooltip>
         </Stack>
-        <AssetsTable />
+        <AssetsTreemap />
       </main>
     </ThemeProvider>
   );

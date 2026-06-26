@@ -107,20 +107,6 @@ app.get("/api/classes", async (req, res) => {
 });
 
 app.post("/api/assets/search", async (req, res) => {
-  const hasFilter =
-    req.body.name ||
-    (Array.isArray(req.body.excludeNames) && req.body.excludeNames.length) ||
-    req.body.parentId ||
-    req.body.statusId ||
-    req.body.classId ||
-    req.body.ancestorId;
-
-  if (!hasFilter) {
-    return res
-      .status(400)
-      .json({ error: "Please provide at least one filter" });
-  }
-
   const params = [];
   const where = ["WHERE 1=1"];
 

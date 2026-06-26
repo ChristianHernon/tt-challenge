@@ -19,8 +19,5 @@ export const useAssetFilters = () => {
 
   useEffect(() => () => clearTimeout(timeoutRef.current), []);
 
-  const hasFilters = Object.values(debouncedParams).some(
-    (v) => v !== undefined,
-  );
-  return { debouncedParams, hasFilters, setParams };
+  return { debouncedParams, setParams };
 };

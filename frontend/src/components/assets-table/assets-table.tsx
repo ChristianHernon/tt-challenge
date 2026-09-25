@@ -1,11 +1,13 @@
 import Stack from "@mui/material/Stack";
 import { DataGrid } from "@mui/x-data-grid/DataGrid";
 import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
 import { useHierarchyQueryOptions } from "../../api/use-hierarchy-query-options";
 import { useSearchAssetsQueryOptions } from "../../api/use-search-assets-query-options";
 import { AssetsTableFilters } from "./assets-table-filters";
 import { useAssetFilters } from "./use-asset-filters";
 import { useAssetsTableColumns } from "./use-assets-table-columns";
+import { usePendingEdits } from "./use-pending-edits";
 
 export const AssetsTable = () => {
   const columns = useAssetsTableColumns();
@@ -15,7 +17,13 @@ export const AssetsTable = () => {
   );
   const { data: hierarchyData } = useQuery(useHierarchyQueryOptions());
 
-  const rows = searchData?.assets ?? [];
+  const { mergeRows } = usePendingEdits();
+
+  const serverRows = searchData?.assets;
+  const rows = useMemo(
+    () => mergeRows(serverRows ?? []),
+    [mergeRows, serverRows],
+  );
 
   return (
     <Stack spacing={4}>

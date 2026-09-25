@@ -13,7 +13,7 @@ import { useSearchAssetsQueryOptions } from "../../api/use-search-assets-query-o
 import { AssetsTableFilters } from "./assets-table-filters";
 import { BulkEditColumnMenu } from "./bulk-edit-column-menu";
 import { BulkEditDialog } from "./bulk-edit-dialog";
-import { buildBulkPatches, diff } from "./bulk-edit-utils";
+import { buildBulkPatches, diff, isValidName } from "./bulk-edit-utils";
 import { useAssetFilters } from "./use-asset-filters";
 import { useAssetsTableColumns } from "./use-assets-table-columns";
 import { usePendingEdits } from "./use-pending-edits";
@@ -73,6 +73,9 @@ export const AssetsTable = () => {
         rows={rows}
         checkboxSelection
         processRowUpdate={(newRow, oldRow) => {
+          // Reject blank names by reverting. (preProcessEditCellProps would
+          // swallow an Enter pressed within the input's 200ms debounce.)
+          if (!isValidName(newRow.name)) return oldRow;
           applyPatch(newRow.id, diff(oldRow, newRow));
           return newRow;
         }}

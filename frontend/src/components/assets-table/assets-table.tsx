@@ -5,6 +5,7 @@ import { useMemo } from "react";
 import { useHierarchyQueryOptions } from "../../api/use-hierarchy-query-options";
 import { useSearchAssetsQueryOptions } from "../../api/use-search-assets-query-options";
 import { AssetsTableFilters } from "./assets-table-filters";
+import { diff } from "./bulk-edit-utils";
 import { useAssetFilters } from "./use-asset-filters";
 import { useAssetsTableColumns } from "./use-assets-table-columns";
 import { usePendingEdits } from "./use-pending-edits";
@@ -17,7 +18,7 @@ export const AssetsTable = () => {
   );
   const { data: hierarchyData } = useQuery(useHierarchyQueryOptions());
 
-  const { mergeRows } = usePendingEdits();
+  const { applyPatch, mergeRows } = usePendingEdits();
 
   const serverRows = searchData?.assets;
   const rows = useMemo(
@@ -34,6 +35,11 @@ export const AssetsTable = () => {
       <DataGrid
         columns={columns}
         rows={rows}
+        checkboxSelection
+        processRowUpdate={(newRow, oldRow) => {
+          applyPatch(newRow.id, diff(oldRow, newRow));
+          return newRow;
+        }}
         getDetailPanelContent={(params) => (
           <span>{params.row.description}</span>
         )}

@@ -1,10 +1,11 @@
 import Stack from "@mui/material/Stack";
 import { DataGrid } from "@mui/x-data-grid/DataGrid";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useHierarchyQueryOptions } from "../../api/use-hierarchy-query-options";
 import { useSearchAssetsQueryOptions } from "../../api/use-search-assets-query-options";
 import { AssetsTableFilters } from "./assets-table-filters";
+import { BulkEditColumnMenu } from "./bulk-edit-column-menu";
 import { diff } from "./bulk-edit-utils";
 import { useAssetFilters } from "./use-asset-filters";
 import { useAssetsTableColumns } from "./use-assets-table-columns";
@@ -19,6 +20,8 @@ export const AssetsTable = () => {
   const { data: hierarchyData } = useQuery(useHierarchyQueryOptions());
 
   const { applyPatch, mergeRows } = usePendingEdits();
+
+  const [, setBulkEditField] = useState<string | null>(null);
 
   const serverRows = searchData?.assets;
   const rows = useMemo(
@@ -52,6 +55,8 @@ export const AssetsTable = () => {
           },
         }}
         showToolbar
+        slots={{ columnMenu: BulkEditColumnMenu }}
+        slotProps={{ columnMenu: { onBulkEdit: setBulkEditField } }}
       />
     </Stack>
   );

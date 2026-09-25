@@ -15,3 +15,7 @@ export const diff = <T extends object>(prev: T, next: T): Partial<T> => {
 };
 
 export const isEmptyPatch = (patch: object) => Object.keys(patch).length === 0;
+
+/** Names must be non-empty once trimmed. */
+export const isValidName = (value: unknown) =>
+  typeof value === "string" && value.trim().length > 0;

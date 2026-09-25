@@ -3,7 +3,6 @@ import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import type { AssetsItem } from "../../api/types";
 import { AncestorBreadcrumbCell } from "./ancestor-breadcrumb-cell";
-import { isValidName } from "./bulk-edit-utils";
 import { IconCell, isIconKey } from "./icon-cell";
 import { StatusCell } from "./status-cell";
 import { STATUSES, isStatus } from "./status-utils";
@@ -24,10 +23,6 @@ export const useAssetsTableColumns = () => {
         editable: true,
         // Names are stored trimmed; applies to inline and bulk edits alike.
         valueSetter: (value: string, row) => ({ ...row, name: value.trim() }),
-        preProcessEditCellProps: ({ props }) => ({
-          ...props,
-          error: !isValidName(props.value),
-        }),
         renderCell: ({ row }) => {
           const { icon, name } = row;
 

@@ -1,17 +1,30 @@
 import Stack from "@mui/material/Stack";
+import {
+  gridRowSelectionIdsSelector,
+  useGridApiRef,
+  type GridColDef,
+} from "@mui/x-data-grid";
 import { DataGrid } from "@mui/x-data-grid/DataGrid";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
+import type { AssetsItem } from "../../api/types";
 import { useHierarchyQueryOptions } from "../../api/use-hierarchy-query-options";
 import { useSearchAssetsQueryOptions } from "../../api/use-search-assets-query-options";
 import { AssetsTableFilters } from "./assets-table-filters";
 import { BulkEditColumnMenu } from "./bulk-edit-column-menu";
-import { diff } from "./bulk-edit-utils";
+import { BulkEditDialog } from "./bulk-edit-dialog";
+import { buildBulkPatches, diff } from "./bulk-edit-utils";
 import { useAssetFilters } from "./use-asset-filters";
 import { useAssetsTableColumns } from "./use-assets-table-columns";
 import { usePendingEdits } from "./use-pending-edits";
 
+type BulkEditState = {
+  colDef: GridColDef<AssetsItem>;
+  rows: AssetsItem[];
+};
+
 export const AssetsTable = () => {
+  const apiRef = useGridApiRef();
   const columns = useAssetsTableColumns();
   const { debouncedParams, setParams } = useAssetFilters();
   const { data: searchData, isFetching } = useQuery(
@@ -19,9 +32,28 @@ export const AssetsTable = () => {
   );
   const { data: hierarchyData } = useQuery(useHierarchyQueryOptions());
 
-  const { applyPatch, mergeRows } = usePendingEdits();
+  const { applyPatch, applyPatches, mergeRows } = usePendingEdits();
 
-  const [, setBulkEditField] = useState<string | null>(null);
+  // Snapshot of the column and selected rows, taken when the dialog opens.
+  const [bulkEdit, setBulkEdit] = useState<BulkEditState | null>(null);
+
+  const openBulkEdit = (field: string) => {
+    if (!apiRef.current) return;
+    // The selector resolves "select all" (exclude model) to concrete rows.
+    const selected = gridRowSelectionIdsSelector(apiRef);
+    setBulkEdit({
+      colDef: apiRef.current.getColumn(field),
+      rows: [...selected.values()].filter(Boolean) as AssetsItem[],
+    });
+  };
+
+  const applyBulkEdit = (value: unknown) => {
+    if (!bulkEdit) return;
+    applyPatches(
+      buildBulkPatches(bulkEdit.rows, bulkEdit.colDef, value, apiRef),
+    );
+    setBulkEdit(null);
+  };
 
   const serverRows = searchData?.assets;
   const rows = useMemo(
@@ -36,6 +68,7 @@ export const AssetsTable = () => {
         hierarchyPaths={hierarchyData?.paths ?? []}
       />
       <DataGrid
+        apiRef={apiRef}
         columns={columns}
         rows={rows}
         checkboxSelection
@@ -56,8 +89,16 @@ export const AssetsTable = () => {
         }}
         showToolbar
         slots={{ columnMenu: BulkEditColumnMenu }}
-        slotProps={{ columnMenu: { onBulkEdit: setBulkEditField } }}
+        slotProps={{ columnMenu: { onBulkEdit: openBulkEdit } }}
       />
+      {bulkEdit && (
+        <BulkEditDialog
+          colDef={bulkEdit.colDef}
+          rows={bulkEdit.rows}
+          onCancel={() => setBulkEdit(null)}
+          onApply={applyBulkEdit}
+        />
+      )}
     </Stack>
   );
 };

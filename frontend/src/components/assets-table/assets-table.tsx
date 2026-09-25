@@ -93,7 +93,9 @@ export const AssetsTable = () => {
         processRowUpdate={(newRow, oldRow) => {
           // Reject blank names by reverting. (preProcessEditCellProps would
           // swallow an Enter pressed within the input's 200ms debounce.)
-          if (!isValidName(newRow.name)) return oldRow;
+          if (newRow.name !== oldRow.name && !isValidName(newRow.name)) {
+            return oldRow;
+          }
           applyPatch(newRow.id, diff(oldRow, newRow));
           return newRow;
         }}

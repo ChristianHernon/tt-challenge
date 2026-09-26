@@ -4,15 +4,12 @@ import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
-import Select from "@mui/material/Select";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import type { GridColDef, GridValidRowModel } from "@mui/x-data-grid";
-import { useId, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   getBulkEditOptions,
   getSelectOptions,
@@ -47,7 +44,6 @@ export const BulkEditDialog = <R extends GridValidRowModel>({
   onCancel,
   onApply,
 }: Props<R>) => {
-  const labelId = useId();
   const [value, setValue] = useState<unknown>(() =>
     getInitialValue(colDef.field, rows),
   );
@@ -102,22 +98,21 @@ export const BulkEditDialog = <R extends GridValidRowModel>({
   switch (colDef.type) {
     case "singleSelect":
       editor = (
-        <FormControl fullWidth>
-          <InputLabel id={labelId}>{headerName}</InputLabel>
-          <Select
-            labelId={labelId}
-            label={headerName}
-            value={value}
-            onChange={(event) => setValue(event.target.value)}
-            autoFocus
-          >
-            {options.map((option) => (
-              <MenuItem key={option.value} value={option.value}>
-                {option.label}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+        // TextField wires up the label itself, so no `useId` (React 18+).
+        <TextField
+          select
+          label={headerName}
+          value={value}
+          onChange={(event) => setValue(event.target.value)}
+          fullWidth
+          autoFocus
+        >
+          {options.map((option) => (
+            <MenuItem key={option.value} value={option.value}>
+              {option.label}
+            </MenuItem>
+          ))}
+        </TextField>
       );
       break;
     case undefined:

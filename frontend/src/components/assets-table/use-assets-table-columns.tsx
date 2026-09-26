@@ -1,14 +1,17 @@
 import Stack from "@mui/material/Stack";
-import type { GridColDef } from "@mui/x-data-grid";
 import { useMemo } from "react";
 import type { AssetsItem } from "../../api/types";
+import {
+  isNonBlankString,
+  type BulkEditColDef,
+} from "../bulk-edit/bulk-edit-utils";
 import { AncestorBreadcrumbCell } from "./ancestor-breadcrumb-cell";
 import { IconCell, isIconKey } from "./icon-cell";
 import { StatusCell } from "./status-cell";
 import { STATUSES, isStatus } from "./status-utils";
 
 export const useAssetsTableColumns = () => {
-  const columns: GridColDef<AssetsItem>[] = useMemo(
+  const columns: BulkEditColDef<AssetsItem>[] = useMemo(
     () => [
       {
         field: "friendlyId",
@@ -21,6 +24,10 @@ export const useAssetsTableColumns = () => {
         flex: 1,
         maxWidth: 200,
         editable: true,
+        bulkEdit: {
+          validate: isNonBlankString,
+          invalidMessage: "Name cannot be empty",
+        },
         // Names are stored trimmed; applies to inline and bulk edits alike.
         valueSetter: (value: string, row) => ({ ...row, name: value.trim() }),
         renderCell: ({ row }) => {
@@ -51,6 +58,7 @@ export const useAssetsTableColumns = () => {
         headerName: "Description",
         flex: 1,
         editable: true,
+        bulkEdit: { multiline: true },
       },
       {
         field: "status",

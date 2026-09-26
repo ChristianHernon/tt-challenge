@@ -69,17 +69,34 @@ export const isValidBulkValue = (colDef: GridColDef, value: unknown) => {
   return FIELD_VALIDATORS[colDef.field]?.(value) ?? true;
 };
 
+/** Placeholder in a bulk text value that is replaced with each row's current value. */
+export const OLD_VALUE_TOKEN = "${oldValue}";
+
+export const hasOldValueToken = (template: string) =>
+  template.includes(OLD_VALUE_TOKEN);
+
 /**
- * Builds one patch per row that actually changes when `value` is written to
- * `colDef`'s field, honouring the column's `valueSetter`.
+ * Replaces every `${oldValue}` in `template` with `oldValue`. Uses split/join
+ * rather than `replaceAll`, whose string replacement would interpret `$&`,
+ * `$1`, etc. inside the old value.
+ */
+export const resolveTemplate = (template: string, oldValue: unknown) =>
+  template
+    .split(OLD_VALUE_TOKEN)
+    .join(oldValue == null ? "" : String(oldValue));
+
+/**
+ * Builds one patch per row that actually changes when `getValue(row)` is
+ * written to `colDef`'s field, honouring the column's `valueSetter`.
  */
 export const buildBulkPatches = <R extends { id: number }>(
   rows: R[],
   colDef: GridColDef<R>,
-  value: unknown,
+  getValue: (row: R) => unknown,
   apiRef: RefObject<GridApi | null>,
 ): [number, Partial<R>][] =>
   rows.flatMap((row) => {
+    const value = getValue(row);
     const next: R = colDef.valueSetter
       ? // Only called while the grid is mounted, so the ref is populated.
         colDef.valueSetter(value, row, colDef, apiRef as RefObject<GridApi>)

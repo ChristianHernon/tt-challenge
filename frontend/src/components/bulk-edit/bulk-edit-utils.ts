@@ -1,9 +1,35 @@
 import type {
-  GridApi,
-  GridSingleSelectColDef,
   GridColDef,
+  GridRowId,
+  GridSingleSelectColDef,
+  GridValidRowModel,
 } from "@mui/x-data-grid";
-import type { RefObject } from "react";
+import { setRowValue, type GridApiRef } from "./grid-compat";
+
+/**
+ * Per-column bulk-edit options. Declared on the column definition itself so
+ * each table configures its own columns; nothing here is keyed by field name.
+ */
+export type BulkEditOptions = {
+  /** Return `false` to reject a value (bulk and inline edits). */
+  validate?: (value: unknown) => boolean;
+  /** Message shown when `validate` rejects a value. */
+  invalidMessage?: string;
+  /** Use a multiline text editor. */
+  multiline?: boolean;
+  /** Text columns accept `${oldValue}` templates unless this is `false`. */
+  template?: boolean;
+};
+
+/**
+ * A column definition with optional bulk-edit options. Assignable to
+ * `GridColDef`, and the grid keeps the extra key on its resolved columns.
+ */
+export type BulkEditColDef<R extends GridValidRowModel = GridValidRowModel> =
+  GridColDef<R> & { bulkEdit?: BulkEditOptions };
+
+export const getBulkEditOptions = (colDef: GridColDef): BulkEditOptions =>
+  (colDef as BulkEditColDef).bulkEdit ?? {};
 
 /**
  * Shallow compare of two objects. Returns only the keys of `next` whose
@@ -23,9 +49,12 @@ export const diff = <T extends object>(prev: T, next: T): Partial<T> => {
 
 export const isEmptyPatch = (patch: object) => Object.keys(patch).length === 0;
 
-/** Names must be non-empty once trimmed. */
-export const isValidName = (value: unknown) =>
+/** Non-empty once trimmed. Handy as a `bulkEdit.validate`. */
+export const isNonBlankString = (value: unknown) =>
   typeof value === "string" && value.trim().length > 0;
+
+export const isTextColumn = (colDef: GridColDef) =>
+  colDef.type === undefined || colDef.type === "string";
 
 export type SelectOption = { value: string | number; label: string };
 
@@ -53,12 +82,8 @@ export const getSelectOptions = (colDef: GridColDef): SelectOption[] => {
   );
 };
 
-/** Per-field validation beyond what the column type implies. */
-const FIELD_VALIDATORS: Partial<Record<string, (value: unknown) => boolean>> = {
-  name: isValidName,
-};
-
-export const isValidBulkValue = (colDef: GridColDef, value: unknown) => {
+/** Checks the column type's constraints, then the column's own `validate`. */
+export const isValidValue = (colDef: GridColDef, value: unknown) => {
   if (
     colDef.type === "singleSelect" &&
     !getSelectOptions(colDef).some((option) => option.value === value)
@@ -66,7 +91,7 @@ export const isValidBulkValue = (colDef: GridColDef, value: unknown) => {
     return false;
   }
 
-  return FIELD_VALIDATORS[colDef.field]?.(value) ?? true;
+  return getBulkEditOptions(colDef).validate?.(value) ?? true;
 };
 
 /** Placeholder in a bulk text value that is replaced with each row's current value. */
@@ -89,18 +114,16 @@ export const resolveTemplate = (template: string, oldValue: unknown) =>
  * Builds one patch per row that actually changes when `getValue(row)` is
  * written to `colDef`'s field, honouring the column's `valueSetter`.
  */
-export const buildBulkPatches = <R extends { id: number }>(
+export const buildBulkPatches = <R extends GridValidRowModel>(
   rows: R[],
   colDef: GridColDef<R>,
   getValue: (row: R) => unknown,
-  apiRef: RefObject<GridApi | null>,
-): [number, Partial<R>][] =>
+  getRowId: (row: R) => GridRowId,
+  apiRef: GridApiRef,
+): [GridRowId, Partial<R>][] =>
   rows.flatMap((row) => {
-    const value = getValue(row);
-    const next: R = colDef.valueSetter
-      ? // Only called while the grid is mounted, so the ref is populated.
-        colDef.valueSetter(value, row, colDef, apiRef as RefObject<GridApi>)
-      : { ...row, [colDef.field]: value };
-    const patch = diff(row, next);
-    return isEmptyPatch(patch) ? [] : [[row.id, patch] as [number, Partial<R>]];
+    const patch = diff(row, setRowValue(colDef, row, getValue(row), apiRef));
+    return isEmptyPatch(patch)
+      ? []
+      : [[getRowId(row), patch] as [GridRowId, Partial<R>]];
   });

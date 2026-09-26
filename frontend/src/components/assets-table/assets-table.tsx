@@ -52,10 +52,10 @@ export const AssetsTable = () => {
     });
   };
 
-  const applyBulkEdit = (value: unknown) => {
+  const applyBulkEdit = (getValue: (row: AssetsItem) => unknown) => {
     if (!bulkEdit) return;
     applyPatches(
-      buildBulkPatches(bulkEdit.rows, bulkEdit.colDef, value, apiRef),
+      buildBulkPatches(bulkEdit.rows, bulkEdit.colDef, getValue, apiRef),
     );
     setBulkEdit(null);
   };

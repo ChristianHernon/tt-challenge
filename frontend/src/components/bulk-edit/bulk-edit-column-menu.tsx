@@ -3,7 +3,6 @@ import ListItemText from "@mui/material/ListItemText";
 import MenuItem from "@mui/material/MenuItem";
 import {
   GridColumnMenu,
-  gridRowSelectionCountSelector,
   useGridApiContext,
   useGridSelector,
   type ColumnMenuPropsOverrides,
@@ -11,10 +10,12 @@ import {
   type GridColumnMenuProps,
 } from "@mui/x-data-grid";
 import { PencilLine } from "lucide-react";
+import { selectedRowCountSelector } from "./grid-compat";
 
 declare module "@mui/x-data-grid" {
   interface ColumnMenuPropsOverrides {
-    onBulkEdit: (field: string) => void;
+    // Optional so other grids' column menus aren't forced to supply it.
+    onBulkEdit?: (field: string) => void;
   }
 }
 
@@ -24,9 +25,9 @@ const BulkEditMenuItem = ({
   onBulkEdit,
 }: GridColumnMenuItemProps & ColumnMenuPropsOverrides) => {
   const apiRef = useGridApiContext();
-  const count = useGridSelector(apiRef, gridRowSelectionCountSelector);
+  const count = useGridSelector(apiRef, selectedRowCountSelector);
 
-  if (!colDef.editable) return null;
+  if (!colDef.editable || !onBulkEdit) return null;
 
   return (
     <MenuItem

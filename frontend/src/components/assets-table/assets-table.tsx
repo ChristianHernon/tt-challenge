@@ -3,6 +3,7 @@ import { DataGrid } from "@mui/x-data-grid/DataGrid";
 import { useQuery } from "@tanstack/react-query";
 import { useHierarchyQueryOptions } from "../../api/use-hierarchy-query-options";
 import { useSearchAssetsQueryOptions } from "../../api/use-search-assets-query-options";
+import { useBulkEdit } from "../bulk-edit/use-bulk-edit";
 import { AssetsTableFilters } from "./assets-table-filters";
 import { useAssetFilters } from "./use-asset-filters";
 import { useAssetsTableColumns } from "./use-assets-table-columns";
@@ -15,7 +16,9 @@ export const AssetsTable = () => {
   );
   const { data: hierarchyData } = useQuery(useHierarchyQueryOptions());
 
-  const rows = searchData?.assets ?? [];
+  const { gridProps, pendingBar, dialog } = useBulkEdit({
+    rows: searchData?.assets,
+  });
 
   return (
     <Stack spacing={4}>
@@ -23,9 +26,10 @@ export const AssetsTable = () => {
         onParamsChange={setParams}
         hierarchyPaths={hierarchyData?.paths ?? []}
       />
+      {pendingBar}
       <DataGrid
+        {...gridProps}
         columns={columns}
-        rows={rows}
         getDetailPanelContent={(params) => (
           <span>{params.row.description}</span>
         )}
@@ -39,6 +43,7 @@ export const AssetsTable = () => {
         }}
         showToolbar
       />
+      {dialog}
     </Stack>
   );
 };

@@ -7,7 +7,8 @@
     "seed": "node --experimental-sqlite seed.js",
     "start": "node --experimental-sqlite server.js",
     "tree": "node --experimental-sqlite visualize.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "export": "node --experimental-sqlite export.js"
   },
   "engines": {
     "node": ">=22.5.0"

@@ -64,3 +64,32 @@ curl -X POST http://localhost:5001/api/assets/search \
   -H "Content-Type: application/json" \
   -d '{}'
 ```
+
+---
+
+## Deploying to Cloudflare Pages
+
+The app deploys as a Cloudflare Pages project. The two read endpoints the UI uses (`POST /api/assets/search`, `GET /api/assets/hierarchy`) run as Pages Functions (`frontend/functions/`) over a JSON snapshot of the seeded database (`frontend/server/assets.json`), because `node:sqlite` isn't available on Workers. Their output matches the Express server exactly.
+
+Pages project settings:
+
+| Setting | Value |
+| --- | --- |
+| Root directory | `frontend` |
+| Build command | `npm run build` |
+| Build output directory | `dist` |
+| Environment variable | `NODE_VERSION=22` |
+
+Saving edits isn't implemented: the **Save** button shows the request payload instead of sending it.
+
+```bash
+# Local dev: Vite proxies /api to the Express server on :5001
+cd backend && npm start
+cd frontend && npm run dev
+
+# Run the production build with the Pages Functions locally
+cd frontend && npm run preview:cf
+
+# After changing seed.js, regenerate the snapshot the Functions read
+cd backend && npm run seed && npm run export
+```

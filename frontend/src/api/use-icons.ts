@@ -16,7 +16,7 @@ export const useIcons = () => {
   return useQuery<typeof ICONS>({
     queryKey: ["icons"],
     queryFn: async () => {
-      const res = await fetch("http://localhost:5001/api/assets/icons");
+      const res = await fetch("/api/assets/icons");
       return res.json();
     },
   });

@@ -64,3 +64,37 @@ curl -X POST http://localhost:5001/api/assets/search \
   -H "Content-Type: application/json" \
   -d '{}'
 ```
+
+---
+
+## Deploying to Cloudflare Workers
+
+The app deploys as one Cloudflare Worker with static assets. Vite's build output (`frontend/dist`) is served as static files; `/api/*` goes to `frontend/worker/index.ts`, which implements the two read endpoints the UI uses (`POST /api/assets/search`, `GET /api/assets/hierarchy`) over a JSON snapshot of the seeded database (`frontend/server/assets.json`). `node:sqlite` isn't available on Workers. The responses match the Express server's exactly. Config lives in `frontend/wrangler.jsonc`.
+
+Workers Builds settings (Workers & Pages → Create → Import a repository):
+
+| Setting | Value |
+| --- | --- |
+| Worker name | `tt-challenge` (must match `name` in `wrangler.jsonc`) |
+| Root directory | `frontend` |
+| Build command | `npm run build` |
+| Deploy command | `npx wrangler deploy` |
+
+Node 26 (LTS) is pinned in `frontend/.node-version`.
+
+Saving edits isn't implemented: the **Save** button shows the request payload instead of sending it.
+
+```bash
+# Local dev: Vite proxies /api to the Express server on :5001
+cd backend && npm start
+cd frontend && npm run dev
+
+# Run the production build in the Workers runtime locally
+cd frontend && npm run preview:cf
+
+# Deploy from your machine instead of Workers Builds
+cd frontend && npx wrangler login && npm run deploy
+
+# After changing seed.js, regenerate the snapshot the Worker reads
+cd backend && npm run seed && npm run export
+```

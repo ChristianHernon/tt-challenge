@@ -1,11 +1,6 @@
 import Chip, { type ChipProps } from "@mui/material/Chip";
 import type { Status } from "../../api/types";
 
-const STATUSES: Status[] = ["Normal", "Warning", "Critical"];
-
-export const isStatus = (value: string): value is Status =>
-  STATUSES.includes(value as Status);
-
 type Props = {
   status: Status;
 };

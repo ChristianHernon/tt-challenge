@@ -10,4 +10,7 @@
     // send every /api request to the script instead.
     "run_worker_first": ["/api/*"],
   },
+  // Required by `wrangler preview`, which Workers Builds runs for
+  // non-production branches. Empty means previews inherit the settings above.
+  "previews": {},
 }

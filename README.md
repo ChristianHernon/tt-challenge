@@ -80,7 +80,7 @@ Workers Builds settings (Workers & Pages → Create → Import a repository):
 | Build command | `npm run build` |
 | Deploy command | `npx wrangler deploy` |
 
-Node 22 is pinned in `frontend/.node-version`.
+Node 26 (LTS) is pinned in `frontend/.node-version`.
 
 Saving edits isn't implemented: the **Save** button shows the request payload instead of sending it.
 

@@ -10,11 +10,12 @@ const HelpText = () => (
       Search by path
     </Typography>
     <Typography variant="body2" sx={{ mb: 1 }}>
-      Separate parts of a location with <code>&gt;</code>. Each part matches
-      part of a level’s name, in order, and levels in between can be skipped.
+      Separate parts of a location with <code>&gt;</code>. Parts match levels in
+      order, and levels in between can be skipped. A part can be several words;
+      a level matches if its name contains all of them.
     </Typography>
     <Typography variant="body2" component="div">
-      <code>topeka &gt; kibble &gt; pump</code> finds
+      <code>topeka &gt; kibble 01 &gt; pump</code> finds
       <Box component="span" sx={{ display: "block", opacity: 0.8, mt: 0.25 }}>
         Topeka Plant › Coating &amp; Enrobing › Kibble Line 01 › Digest Pump
       </Box>

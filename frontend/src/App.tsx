@@ -15,6 +15,14 @@ function App() {
     () =>
       createTheme({
         palette: { mode },
+        spacing: "4px",
+        components: {
+          MuiStack: {
+            defaultProps: {
+              useFlexGap: true,
+            }
+          }
+        }
       }),
     [mode],
   );
@@ -27,7 +35,7 @@ function App() {
           it while menus are open, which made the page flicker). */}
       <main
         style={{
-          padding: "2rem",
+          padding: "1rem",
           height: "100dvh",
           boxSizing: "border-box",
           display: "flex",
@@ -39,9 +47,9 @@ function App() {
           sx={{ justifyContent: "space-between", alignItems: "center", mb: 4 }}
         >
           <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
-            <PawPrint size={48} />
+            <PawPrint size={36} />
             <Typography
-              variant="h2"
+              variant="h4"
               sx={{ color: mode === "dark" ? "#eee" : "#333" }}
             >
               Acme Pet Nutrition

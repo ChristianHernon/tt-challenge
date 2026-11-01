@@ -9,7 +9,7 @@ export const useHierarchyQueryOptions = () =>
   queryOptions({
     queryKey: ["assets", "hierarchy"],
     queryFn: async (): Promise<HierarchyResponse> => {
-      const res = await fetch("http://localhost:5001/api/assets/hierarchy");
+      const res = await fetch("/api/assets/hierarchy");
       return res.json();
     },
   });

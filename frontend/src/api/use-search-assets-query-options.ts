@@ -25,7 +25,7 @@ export const useSearchAssetsQueryOptions = (params: SearchAssetsParams) => {
   return queryOptions({
     queryKey: getSearchAssetsQueryKey(params),
     queryFn: async (): Promise<SearchAssetsResponse> => {
-      const res = await fetch("http://localhost:5001/api/assets/search", {
+      const res = await fetch("/api/assets/search", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(params),

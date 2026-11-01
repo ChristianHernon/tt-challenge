@@ -127,3 +127,10 @@ export const buildBulkPatches = <R extends GridValidRowModel>(
       ? []
       : [[getRowId(row), patch] as [GridRowId, Partial<R>]];
   });
+
+/** Request body a save endpoint could take: only the changed fields per row. */
+export const buildSavePayload = <R extends GridValidRowModel>(
+  pendingEdits: Map<GridRowId, Partial<R>>,
+) => ({
+  updates: [...pendingEdits].map(([id, changes]) => ({ id, changes })),
+});

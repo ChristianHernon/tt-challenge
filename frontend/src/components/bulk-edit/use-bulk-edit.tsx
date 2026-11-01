@@ -12,6 +12,7 @@ import { BulkEditDialog } from "./bulk-edit-dialog";
 import { buildBulkPatches, diff, isValidValue } from "./bulk-edit-utils";
 import { getSelectedRows } from "./grid-compat";
 import { PendingEditsBar } from "./pending-edits-bar";
+import { SaveEditsDialog } from "./save-edits-dialog";
 import { usePendingEdits } from "./use-pending-edits";
 
 const PENDING_CELL_CLASS = "cell--pending";
@@ -57,6 +58,7 @@ export const useBulkEdit = <R extends GridValidRowModel>({
 
   // Snapshot of the column and selected rows, taken when the dialog opens.
   const [bulkEdit, setBulkEdit] = useState<BulkEditState<R> | null>(null);
+  const [isSaveOpen, setIsSaveOpen] = useState(false);
 
   const rows = useMemo(
     () => mergeRows(serverRows ?? []),
@@ -126,15 +128,29 @@ export const useBulkEdit = <R extends GridValidRowModel>({
       slotProps: { columnMenu: { onBulkEdit: openBulkEdit } },
     } satisfies Partial<DataGridProps<R>>,
     pendingBar: (
-      <PendingEditsBar count={pendingEdits.size} onDiscard={discardAll} />
-    ),
-    dialog: bulkEdit && (
-      <BulkEditDialog
-        colDef={bulkEdit.colDef}
-        rows={bulkEdit.rows}
-        onCancel={() => setBulkEdit(null)}
-        onApply={applyBulkEdit}
+      <PendingEditsBar
+        count={pendingEdits.size}
+        onDiscard={discardAll}
+        onSave={() => setIsSaveOpen(true)}
       />
+    ),
+    dialog: (
+      <>
+        {bulkEdit && (
+          <BulkEditDialog
+            colDef={bulkEdit.colDef}
+            rows={bulkEdit.rows}
+            onCancel={() => setBulkEdit(null)}
+            onApply={applyBulkEdit}
+          />
+        )}
+        {isSaveOpen && (
+          <SaveEditsDialog
+            pendingEdits={pendingEdits}
+            onClose={() => setIsSaveOpen(false)}
+          />
+        )}
+      </>
     ),
   };
 };

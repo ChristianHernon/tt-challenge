@@ -8,6 +8,7 @@ import TextField from "@mui/material/TextField";
 import { useState } from "react";
 import type { HierarchyPath } from "../../api/types";
 import type { SearchAssetsParams } from "../../api/use-search-assets-query-options";
+import { LocationFilterHelp } from "./location-filter-help";
 import { locationFilterOptions } from "./location-filter-utils";
 
 interface Props {
@@ -103,7 +104,26 @@ export const AssetsTableFilters = ({
         value={ancestor}
         onChange={(_, value) => handleAncestorChange(value)}
         sx={{ flex: 1 }}
-        renderInput={(params) => <TextField {...params} label="Location" />}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            label="Location"
+            slotProps={{
+              ...params.slotProps,
+              input: {
+                ...params.slotProps.input,
+                // Sits before the clear/open buttons, which are absolutely
+                // positioned inside the Autocomplete's own endAdornment.
+                endAdornment: (
+                  <>
+                    <LocationFilterHelp />
+                    {params.slotProps.input.endAdornment}
+                  </>
+                ),
+              },
+            }}
+          />
+        )}
       />
     </Stack>
   );

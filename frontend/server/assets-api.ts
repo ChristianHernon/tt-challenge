@@ -1,5 +1,5 @@
-// In-memory port of the read endpoints in backend/server.js, for Cloudflare
-// Pages Functions (no node:sqlite there). Data is the snapshot written by
+// In-memory port of the read endpoints in backend/server.js, for the Cloudflare
+// Worker (no node:sqlite there). Data is the snapshot written by
 // `npm run export` in backend/. Keep the behavior in sync with server.js.
 import rawAssets from "./assets.json";
 

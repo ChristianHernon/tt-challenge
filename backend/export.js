@@ -1,5 +1,5 @@
 // Exports the seeded database as a flat JSON snapshot for the Cloudflare
-// Pages Functions in frontend/functions, which can't use node:sqlite.
+// Worker in frontend/worker, which can't use node:sqlite.
 // Ancestors and hierarchy paths are derived from parentId at runtime, so
 // only the joined asset rows are stored. Run after `npm run seed`.
 const fs = require("fs");

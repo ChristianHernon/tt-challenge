@@ -67,18 +67,20 @@ curl -X POST http://localhost:5001/api/assets/search \
 
 ---
 
-## Deploying to Cloudflare Pages
+## Deploying to Cloudflare Workers
 
-The app deploys as a Cloudflare Pages project. The two read endpoints the UI uses (`POST /api/assets/search`, `GET /api/assets/hierarchy`) run as Pages Functions (`frontend/functions/`) over a JSON snapshot of the seeded database (`frontend/server/assets.json`), because `node:sqlite` isn't available on Workers. Their output matches the Express server exactly.
+The app deploys as one Cloudflare Worker with static assets. Vite's build output (`frontend/dist`) is served as static files; `/api/*` goes to `frontend/worker/index.ts`, which implements the two read endpoints the UI uses (`POST /api/assets/search`, `GET /api/assets/hierarchy`) over a JSON snapshot of the seeded database (`frontend/server/assets.json`). `node:sqlite` isn't available on Workers. The responses match the Express server's exactly. Config lives in `frontend/wrangler.jsonc`.
 
-Pages project settings:
+Workers Builds settings (Workers & Pages → Create → Import a repository):
 
 | Setting | Value |
 | --- | --- |
+| Worker name | `tt-challenge` (must match `name` in `wrangler.jsonc`) |
 | Root directory | `frontend` |
 | Build command | `npm run build` |
-| Build output directory | `dist` |
-| Environment variable | `NODE_VERSION=22` |
+| Deploy command | `npx wrangler deploy` |
+
+Node 22 is pinned in `frontend/.node-version`.
 
 Saving edits isn't implemented: the **Save** button shows the request payload instead of sending it.
 
@@ -87,9 +89,12 @@ Saving edits isn't implemented: the **Save** button shows the request payload in
 cd backend && npm start
 cd frontend && npm run dev
 
-# Run the production build with the Pages Functions locally
+# Run the production build in the Workers runtime locally
 cd frontend && npm run preview:cf
 
-# After changing seed.js, regenerate the snapshot the Functions read
+# Deploy from your machine instead of Workers Builds
+cd frontend && npx wrangler login && npm run deploy
+
+# After changing seed.js, regenerate the snapshot the Worker reads
 cd backend && npm run seed && npm run export
 ```

@@ -22,7 +22,18 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <main style={{ padding: "2rem" }}>
+      {/* Full-height column: the grid takes the leftover space and scrolls
+          its own rows, so the page itself never needs a scrollbar (MUI hides
+          it while menus are open, which made the page flicker). */}
+      <main
+        style={{
+          padding: "2rem",
+          height: "100dvh",
+          boxSizing: "border-box",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
         <Stack
           direction="row"
           sx={{ justifyContent: "space-between", alignItems: "center", mb: 4 }}

@@ -21,7 +21,7 @@ export const AssetsTable = () => {
   });
 
   return (
-    <Stack spacing={4}>
+    <Stack spacing={4} sx={{ flex: 1, minHeight: 0 }}>
       <AssetsTableFilters
         onParamsChange={setParams}
         hierarchyPaths={hierarchyData?.paths ?? []}
@@ -29,6 +29,8 @@ export const AssetsTable = () => {
       {pendingBar}
       <DataGrid
         {...gridProps}
+        // Fill the remaining height; below ~300px let the page scroll instead.
+        sx={[gridProps.sx, { flex: 1, minHeight: 300 }]}
         columns={columns}
         getDetailPanelContent={(params) => (
           <span>{params.row.description}</span>
